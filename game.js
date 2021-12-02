@@ -25,12 +25,30 @@ var jugador;
 var arriba,abajo,izquierda,derecha;
 const velocidad = 350;
 const alturaSalto = -530;
+
+// Variable para controlar la configuración del mapa
+var mapa;
+
 function preload() {
     /*importamos el sprite del primer personaje */
     this.load.spritesheet('personaje1', 'assets/sprites/personaje1.png', { frameWidth: 57, frameHeight: 62, });
+    
+    // Importamos el JSON para generar nuestro mapa
+    this.load.tilemapTiledJSON('mapa','assets/mapa/mapa.json')
+    this.load.image('tiles','assets/mapa/tileSets.png')
 }
 /*Inicializamos el sprite del personaje1*/
 function create(){
+
+    // Creamos el objeto mapa con sus tilesets
+    mapa = this.make.tilemap({ key : 'mapa'})
+    var tilesets = mapa.addTilesetImage('tileSets','tiles') 
+
+    // Agregando las capas del mapa
+    var solidos = mapa.createDynamicLayer('solidos',tilesets,0,0)
+    solidos.setCollisionByProperty({ solido : true}) //Agreando la propiedad de solido a los solidos
+
+
     /*con physics.add agregamos fisicas al sprite*/
     jugador = this.physics.add.sprite(100,100,'personaje1',0);//sprite(posicion en x,y,nombreDelSprite,numeroSprite)
     jugador.setCollideWorldBounds(true);//Hacer que choque con los limites del mundo
@@ -41,6 +59,9 @@ function create(){
         frames: this.anims.generateFrameNumbers('personaje1',{start: 1, end:8}),
         frameRate:10
     });
+
+    this.physics.add.collieder(jugador,solidos) //Ahora el jugador colisiona con los objetos con propiedad solidos
+    
 
     /*asignamos las entradas del teclado con las que se movera el jugador*/
     arriba = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.UP);
