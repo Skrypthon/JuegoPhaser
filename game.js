@@ -1,12 +1,12 @@
 var config = {
     type: Phaser.AUTO,
-    width: 1200,
-    height: 600,
+    width: window.innerWidth, //Para que se adapte al tamaño completo de la pantalla  
+    height: window.innerHeight,
     autoResize: true,
     physics: {
         default: 'arcade',
         arcade: {
-            debug: false,
+            debug: true,
             gravity: { y: 1000 }
         }
     },
@@ -31,27 +31,32 @@ var mapa;
 
 function preload() {
     /*importamos el sprite del primer personaje */
-    this.load.spritesheet('personaje1', 'assets/sprites/personaje1.png', { frameWidth: 57, frameHeight: 62, });
+    this.load.spritesheet('personaje1', 'assets/sprites/personaje1.png', { frameWidth: 57, frameHeight: 62 });
     
     // Importamos el JSON para generar nuestro mapa
-    this.load.tilemapTiledJSON('mapa','assets/mapa/mapa.json')
+    this.load.tilemapTiledJSON('mapa', 'assets/mapa/mapa.json')
     this.load.image('tiles','assets/mapa/tileSets.png')
 }
 /*Inicializamos el sprite del personaje1*/
 function create(){
+    game.config.backgroundColor.setTo(100,210,222) //RGB
 
     // Creamos el objeto mapa con sus tilesets
-    mapa = this.make.tilemap({ key : 'mapa'})
-    var tilesets = mapa.addTilesetImage('tileSets','tiles') 
-
-    // Agregando las capas del mapa
-    var solidos = mapa.createDynamicLayer('solidos',tilesets,0,0)
-    solidos.setCollisionByProperty({ solido : true}) //Agreando la propiedad de solido a los solidos
-
+    mapa = this.make.tilemap({ key: 'mapa' })
+    var tilesets = mapa.addTilesetImage('tileSets', 'tiles')  //Los tileSets es el nombre del objeto de donde se sacaron las paredes 
+  
+    // Agregando las nubes
+    var nubes = mapa.createDynamicLayer('nubes', tilesets, 0, 0)
+    
+    // Agregando las capas del mapa, en este caso son las paredes
+    var solidos = mapa.createDynamicLayer('solidos', tilesets, 0, 0)
+    solidos.setCollisionByProperty({ solido : true }) //Agreando la propiedad de solido a los solidos
 
     /*con physics.add agregamos fisicas al sprite*/
     jugador = this.physics.add.sprite(100,100,'personaje1',0);//sprite(posicion en x,y,nombreDelSprite,numeroSprite)
-    jugador.setCollideWorldBounds(true);//Hacer que choque con los limites del mundo
+    // jugador.setCollideWorldBounds(true);//Hacer que choque con los limites del mundo
+    jugador.setSize(30,0) // Para cambiar el hitbox del jugador
+
 
     //creamos la animacion de caminar para el spirte personaje1
     this.anims.create({
@@ -60,8 +65,11 @@ function create(){
         frameRate:10
     });
 
-    this.physics.add.collieder(jugador,solidos) //Ahora el jugador colisiona con los objetos con propiedad solidos
+    this.physics.add.collider(jugador,solidos) //Ahora el jugador colisiona con los objetos con propiedad solidos
     
+    // Estas lineas sirven para que la camara se centre en el jugador
+    this.cameras.main.setBounds(0,0, mapa.widthInPixels, mapa.healthInPixels)
+    this.cameras.main.startFollow(jugador)
 
     /*asignamos las entradas del teclado con las que se movera el jugador*/
     arriba = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.UP);
