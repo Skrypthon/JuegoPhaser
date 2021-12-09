@@ -39,6 +39,11 @@ function preload() {
 }
 /*Inicializamos el sprite del personaje1*/
 function create(){
+    // Al escuchar el evento jugador-saltando 
+    socket.on('jugador-saltando', () => {
+        console.log("Algun jugador esta saltando")
+    })
+
     game.config.backgroundColor.setTo(100,210,222) //RGB
 
     // Creamos el objeto mapa con sus tilesets
@@ -93,6 +98,7 @@ function update(){
 
     if(arriba.isDown && jugador.body.onFloor()){//onFloor() hacer que solo se pueda saltar cuando se esta tocando el suelo
         jugador.body.setVelocityY(alturaSalto);
+        socket.emit('saltar') // Para comunicarnos con los otros jugadores clientes del socket
     }
 
     //Para activar la animacion de caminar

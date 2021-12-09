@@ -5,9 +5,24 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VideoJuego2D</title>
-
 </head>
+
+<style>
+    canvas{
+        display : block;
+        margin : auto;
+    }
+    body{
+        margin : 0px;
+    }
+</style>
 <body>
+    <script src= "https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.1/socket.io.dev.js"></script>
+    <!-- Vamos a ser clientes del socket en el puerto 2525 -->
+    <script>
+        const socket = io('http://localhost:2525')
+    </script>
+    
     <script src="phaser.min.js"></script>
     <script src="game.js"></script>
 </body>
