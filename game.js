@@ -61,8 +61,12 @@ var EscenaMenu = new Phaser.Class({
 
 function collectDiamond(juador1, diamonds) {
   // Removes the diamond from the screen
-  diamonds.setActive(false).setVisible(false);
-	diamonds.destroy();
+  console.log('Hay colisicones')
+  if(diamonds.active){
+    diamondsgroup.killAndHide(diamonds)
+    
+    diamonds.setActive(false).setVisible(false);
+  }
   //  And update the score
   /*score += 10;
   scoreText.text = "Score: " + score;*/
@@ -109,6 +113,8 @@ var EscenaJuego = new Phaser.Class({
   create() {
     game.config.backgroundColor.setTo(100, 210, 222); //RGB
 
+    
+
     // Creamos el objeto mapa con sus tilesets
     mapa = this.make.tilemap({ key: "mapa" });
     var tilesets = mapa.addTilesetImage("tileSets", "tiles"); //Los tileSets es el nombre del objeto de donde se sacaron las paredes
@@ -129,22 +135,43 @@ var EscenaJuego = new Phaser.Class({
     jugador1.setSize(20, 0); 
 
 
+    diamondsgroup = this.physics.add.group({
+      defaultKey:'diamond',
+      maxSize: 10 
+    })
+
+    for(var i = 0; i < 6; i++) {
+      diamonds = diamondsgroup.get();
+     
+      if (diamonds){
+        diamonds.setActive(true).setVisible(true)
+        diamonds.x = 130*i
+        diamonds.y = 10*i
+        this.physics.add.collider(diamonds, solidos);     
+      } 
+    }
+    this.physics.add.overlap(jugador1, diamondsgroup, collectDiamond, null, this);
+
     /*con physics.add agregamos fisicas al sprite*/
     jugador2 = this.physics.add.sprite(100, 100, "personaje1", 0); //sprite(posicion en x,y,nombreDelSprite,numeroSprite)
     jugador2.setVisible(true);
     this.physics.add.collider(jugador2, solidos);
     jugador2.setSize(30, 0); // Para cambiar el hitbox del jugador
 
+
+   
+
+    /*
     //Generamos muchos diamantes
     for (var i = 0; i < 6; i++) {
       diamonds = this.physics.add.sprite(130*i, 10*i, "diamond", 0);
       this.physics.add.collider(diamonds, solidos);
       //diamonds.setCollideWorldBounds(true);
-
+      
       diamonds.body.gravity.y = 1000;
       diamonds.body.bounce.y = 0.3 + Math.random() * 0.2;
-    }
-
+    } */
+    
     //Barra de puntaje
     //scoreText = this.add.text(16, 16, "", { fontSize: "32px", fill: "#000" });
 
@@ -168,6 +195,8 @@ var EscenaJuego = new Phaser.Class({
       frameRate: 10,
     });
 
+    
+
     //Ahora el jugador colisiona con los objetos con propiedad solidos.
     this.physics.add.collider(jugador1, solidos); 
 
@@ -181,7 +210,7 @@ var EscenaJuego = new Phaser.Class({
     derecha = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.RIGHT);
     letraA = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
 
-    this.physics.add.overlap(jugador1, diamonds, collectDiamond, null, this);
+    
   },
 
   update() {
