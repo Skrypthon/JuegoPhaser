@@ -284,14 +284,18 @@ var EscenaJuego = new Phaser.Class({
       jugador2.setVisible(true);
       secondPlayer.x = secondX;
       secondPlayer.y = secondY;
-      textop2.setVisible(true);
+      
+      if(textop2.visible!=true){
+        textop2.setVisible(true);
+      }
+      //
       textop2.x = secondX-100
       textop2.y = secondY-100
       textop2.setText('Marcador: ' + scorep2)
     }
     if(estadoP2 == 'WINNER'){
       estado = 'LOSER'
-      console.log("Si llego aquí")
+      //console.log("Si llego aquí")
       this.scene.start("EscenaFinal")
     }
     //Para activar la animacion de caminar
@@ -325,7 +329,7 @@ var EscenaFinal = new Phaser.Class({
   create() {
 
     var texto1 = this.add
-      .text(game.config.width / 2, game.config.height / 4, "You Are a "+estado, {
+      .text(game.config.width / 2, game.config.height / 4, "TU"+estado, {
         fontSize: "100px",
         fill: "#ffffff",
       })
