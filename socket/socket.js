@@ -30,7 +30,7 @@ io.on("connection", (socket) => {
   });
 });
 
-var port = 5500;
+var port = 8080;
 
 // La aplicacion escucha en el puerto port
 http.listen(port, function () {
