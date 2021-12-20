@@ -1,5 +1,6 @@
 //La escenas deben ir arriba de la variable de configurcion
 
+
 /*variable para controlar el sprite del Personaje1*/
 var jugador1;
 var jugador2;
@@ -11,16 +12,20 @@ var secondPlayer = false; //Bandera si es que existe un segundo jugador
 var arriba, abajo, izquierda, derecha,letraA;
 var secondX; //Posicion en x del segundo jugador
 var secondY; //Posicion en y del segundo jugador
+
 const velocidad = 350;
 const alturaSalto = -530;
 
 // Variable para controlar la configuración del mapa
 var mapa;
-
+var texto
+var textop2
 var score = 0;
+var scorep2 = 0;
 var diamonds;
 var scoreText;
-
+var estado = 'jugando'
+var estadoP2 = 'jugando'
 
 
 //Las escenas deben tener el mismo formato (Video 7)
@@ -61,15 +66,23 @@ var EscenaMenu = new Phaser.Class({
 
 function collectDiamond(juador1, diamonds) {
   // Removes the diamond from the screen
-  console.log('Hay colisicones')
+  //console.log('Hay colisicones')
   if(diamonds.active){
     diamondsgroup.killAndHide(diamonds)
-    
     diamonds.setActive(false).setVisible(false);
+    score += 10;
+    if(score == 180){
+      estado = 'WINNER' 
+      this.scene.start("EscenaFinal")
+    }
+    //console.log(score)
+    ActualizarText()  
   }
   //  And update the score
-  /*score += 10;
-  scoreText.text = "Score: " + score;*/
+ 
+}
+function ActualizarText() {
+ texto.setText('Marcador: ' + score)
 }
 
 var EscenaJuego = new Phaser.Class({
@@ -112,8 +125,19 @@ var EscenaJuego = new Phaser.Class({
   /*Inicializamos el sprite del personaje1*/
   create() {
     game.config.backgroundColor.setTo(100, 210, 222); //RGB
+    score = 0;
+    scorep2 = 0;
+    estadoP2 = 'jugando'
 
-    
+    texto = this.add.text(0,0, 'Marcador: ' + score,{
+      fontSize: '30px',
+      fill: '#000000'
+    }).setDepth(0.1);
+
+    textop2 = this.add.text(0,0, 'Marcador: ' + score,{
+      fontSize: '30px',
+      fill: '#000000'
+    }).setVisible(false).setDepth(0.1);
 
     // Creamos el objeto mapa con sus tilesets
     mapa = this.make.tilemap({ key: "mapa" });
@@ -137,19 +161,20 @@ var EscenaJuego = new Phaser.Class({
 
     diamondsgroup = this.physics.add.group({
       defaultKey:'diamond',
-      maxSize: 10 
+      maxSize: 70 
     })
-
-    for(var i = 0; i < 6; i++) {
-      diamonds = diamondsgroup.get();
-     
-      if (diamonds){
-        diamonds.setActive(true).setVisible(true)
-        diamonds.x = 130*i
-        diamonds.y = 10*i
-        this.physics.add.collider(diamonds, solidos);     
-      } 
+    for(var i0 = 0; i0 < 7;i0++){
+      for(var i = 0; i < 10; i++) {
+        diamonds = diamondsgroup.get();
+        if (diamonds){
+          diamonds.setActive(true).setVisible(true)
+          diamonds.x = 130*i
+          diamonds.y = 100*i0
+          this.physics.add.collider(diamonds, solidos);     
+        } 
+      }
     }
+    
     this.physics.add.overlap(jugador1, diamondsgroup, collectDiamond, null, this);
 
     /*con physics.add agregamos fisicas al sprite*/
@@ -221,12 +246,18 @@ var EscenaJuego = new Phaser.Class({
     var posP1 = {
       x: jugador1.x,
       y: jugador1.y,
+      es: estado,
+      score: score
     };
     socket.emit("posicion", posP1);
 
     jugador2.x = secondX;
     jugador2.y = secondY;
     //Habilitamos las teclas del teclado con las que el jugador se movera
+
+    texto.x = posP1.x-100
+    texto.y = posP1.y-100
+
     if (izquierda.isDown) {
 
        //se le resta en x para que vaya a la izq
@@ -253,6 +284,15 @@ var EscenaJuego = new Phaser.Class({
       jugador2.setVisible(true);
       secondPlayer.x = secondX;
       secondPlayer.y = secondY;
+      textop2.setVisible(true);
+      textop2.x = secondX-100
+      textop2.y = secondY-100
+      textop2.setText('Marcador: ' + scorep2)
+    }
+    if(estadoP2 == 'WINNER'){
+      estado = 'LOSER'
+      console.log("Si llego aquí")
+      this.scene.start("EscenaFinal")
     }
     //Para activar la animacion de caminar
     if ((izquierda.isDown || derecha.isDown) && jugador1.body.onFloor()) {
@@ -272,6 +312,46 @@ var EscenaJuego = new Phaser.Class({
   },
 });
 
+//Las escenas deben tener el mismo formato (Video 7)
+var EscenaFinal = new Phaser.Class({
+  //Esta es la escena del menu, solo muestra un mensaje interactivo.
+
+  Extends: Phaser.Scene,
+
+  initialize: function EscenaFinal() {
+    Phaser.Scene.call(this, { key: "EscenaFinal" });
+  },
+
+  create() {
+
+    var texto1 = this.add
+      .text(game.config.width / 2, game.config.height / 4, "You Are a "+estado, {
+        fontSize: "100px",
+        fill: "#ffffff",
+      })
+      .setOrigin(0.5)
+      .setInteractive();
+    var texto = this.add
+      .text(
+        game.config.width / 2,
+        game.config.height / 2,
+        "Da click aquí para reiniciar el juego:",
+        {
+          fontSize: "40px",
+          fill: "#ffffff",
+        }
+      )
+      .setOrigin(0.5)
+      .setInteractive();
+    this.input.on("pointerdown", () => {
+      this.scene.start("EscenaMenu");
+    });
+  },
+});
+
+
+
+
 var config = {
   type: Phaser.AUTO,
   width: window.innerWidth, //Para que se adapte al tamaño completo de la pantalla
@@ -284,7 +364,7 @@ var config = {
       gravity: { y: 1000 },
     },
   },
-  scene: [EscenaMenu, EscenaJuego],
+  scene: [EscenaMenu, EscenaJuego, EscenaFinal],
 };
 
 var game = new Phaser.Game(config);
@@ -301,7 +381,9 @@ socket.on("jugador-saltando", () => {
 }) /
   socket.on("posPlayer2", (data) => {
     //Conexion socket con la posicion del segundo jugador
-    console.log("El player dos envio estos datos:  " + data.x + data.y);
+    console.log("El player dos envio estos datos:  " + data.es);
     secondX = data.x;
     secondY = data.y;
+    estadoP2 = data.es;
+    scorep2 = data.score;
   });
