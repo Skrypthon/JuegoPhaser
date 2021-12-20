@@ -126,6 +126,7 @@ var EscenaJuego = new Phaser.Class({
   create() {
     game.config.backgroundColor.setTo(100, 210, 222); //RGB
     score = 0;
+    estado = 'jugando'
     scorep2 = 0;
     estadoP2 = 'jugando'
 
@@ -329,7 +330,7 @@ var EscenaFinal = new Phaser.Class({
   create() {
 
     var texto1 = this.add
-      .text(game.config.width / 2, game.config.height / 4, "TU"+estado, {
+      .text(game.config.width / 2, game.config.height / 4, estado, {
         fontSize: "100px",
         fill: "#ffffff",
       })
@@ -364,7 +365,7 @@ var config = {
   physics: {
     default: "arcade",
     arcade: {
-      debug: true,
+      debug: false,
       gravity: { y: 1000 },
     },
   },
