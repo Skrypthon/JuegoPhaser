@@ -71,7 +71,7 @@ function collectDiamond(juador1, diamonds) {
     diamondsgroup.killAndHide(diamonds)
     diamonds.setActive(false).setVisible(false);
     score += 10;
-    if(score == 180){
+    if(score == 220){
       estado = 'WINNER' 
       this.scene.start("EscenaFinal")
     }
